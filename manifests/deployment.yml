@@ -1,0 +1,19 @@
+apiVersion : apps/v1
+kind: Deployment
+metadata:
+  name: gravityppmapi 
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gravityppmapi
+  template:
+    metadata:
+      labels:
+        app: gravityppmapi 
+    spec:
+      containers:
+        - name: gravityppmapi 
+          image: crgaks.azurecr.io/gravityppmapi
+          ports:
+          - containerPort: 8080
