@@ -1,0 +1,19 @@
+apiVersion : apps/v1
+kind: Deployment
+metadata:
+  name: ppmapi 
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ppmapi
+  template:
+    metadata:
+      labels:
+        app: ppmapi 
+    spec:
+      containers:
+        - name: ppmapi 
+          image: crgaks.azurecr.io/ppmapi
+          ports:
+          - containerPort: 8080
