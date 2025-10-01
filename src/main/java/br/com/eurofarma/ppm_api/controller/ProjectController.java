@@ -32,16 +32,15 @@ public class ProjectController {
 
         @PostMapping
     public Project create(@RequestBody Project project) {
-        // A anotação @RequestBody pega o JSON enviado no corpo da requisição
-        // e o transforma em um objeto Project automaticamente.
+       
         return projectRepository.save(project);
     }
         // GET by ID - Para buscar um projeto específico
     @GetMapping("/{id}")
     public ResponseEntity<Project> getById(@PathVariable Long id) {
         return projectRepository.findById(id)
-                .map(ResponseEntity::ok) // Se encontrar, retorna 200 OK com o projeto
-                .orElse(ResponseEntity.notFound().build()); // Se não, retorna 404 Not Found
+                .map(ResponseEntity::ok) 
+                .orElse(ResponseEntity.notFound().build()); 
     }
 
     // PUT - Para atualizar um projeto existente
@@ -64,17 +63,16 @@ public class ProjectController {
     // DELETE - Para excluir um projeto
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
-        // Primeiro, verificamos se o projeto com este ID realmente existe.
-        // O método existsById é mais eficiente que findById se você não precisa do objeto.
+       
         if (!projectRepository.existsById(id)) {
-            // Se não existe, retornamos 404 Not Found.
+            
             return ResponseEntity.notFound().build();
         }
 
-        // Se existe, nós deletamos.
+      
         projectRepository.deleteById(id);
 
-        // E retornamos 204 No Content, que é o padrão para um delete bem-sucedido.
+   
         return ResponseEntity.noContent().build();
     }
     

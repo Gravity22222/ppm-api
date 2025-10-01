@@ -1,21 +1,23 @@
 package br.com.eurofarma.ppm_api.model;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority; // Import importante
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List; 
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "_user") // Usamos "_user" porque "user" pode ser uma palavra reservada em alguns bancos
+@Table(name = "_user")
 public class User implements UserDetails {
 
     @Id
@@ -28,15 +30,18 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
-    // --- Métodos da interface UserDetails ---
-    // Vamos manter a lógica de perfis/autorizações simples por enquanto
+   
+    @Enumerated(EnumType.STRING) //
+    private Role role;
 
+    
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // No futuro, aqui retornaremos os perfis (ex: "ROLE_ADMIN", "ROLE_USER")
-        return Collections.emptyList();
+        
+        return List.of(new SimpleGrantedAuthority(role.name()));
     }
 
+    
     @Override
     public String getPassword() {
         return password;
@@ -47,7 +52,6 @@ public class User implements UserDetails {
         return username;
     }
 
-    // Para simplificar, vamos retornar 'true' para todos os controles de conta
     @Override
     public boolean isAccountNonExpired() {
         return true;

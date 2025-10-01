@@ -7,8 +7,8 @@ import jakarta.persistence.Id;
 import lombok.Data;
 import java.time.LocalDate;
 
-@Data // Anotação do Lombok que cria getters, setters, toString, etc.
-@Entity // Anotação do JPA que marca esta classe como uma tabela no banco.
+@Data 
+@Entity 
 public class Project {
 
     @Id
@@ -17,8 +17,8 @@ public class Project {
 
     private String name;
     private String description;
-    private String responsible; // Quem é o responsável?
-    private String status; // Ex: "Em Andamento", "Concluído", "Pausado"
+    private String responsible; 
+    private String status; 
     private LocalDate startDate;
     private LocalDate endDate;
 }

@@ -1,6 +1,7 @@
 package br.com.eurofarma.ppm_api;
 
 import br.com.eurofarma.ppm_api.model.Project;
+import br.com.eurofarma.ppm_api.model.Role;
 import br.com.eurofarma.ppm_api.model.User;
 import br.com.eurofarma.ppm_api.repository.ProjectRepository;
 import br.com.eurofarma.ppm_api.repository.UserRepository;
@@ -19,10 +20,10 @@ public class DataLoader implements CommandLineRunner {
     private ProjectRepository projectRepository;
 
     @Autowired
-    private UserRepository userRepository; // Injetamos o repositório de usuário
+    private UserRepository userRepository; 
 
     @Autowired
-    private PasswordEncoder passwordEncoder; // Injetamos o codificador de senha
+    private PasswordEncoder passwordEncoder; 
 
     @Override
     public void run(String... args) throws Exception {
@@ -34,12 +35,15 @@ public class DataLoader implements CommandLineRunner {
         if (userRepository.count() == 0) {
             User adminUser = User.builder()
                     .username("admin")
-                    // IMPORTANTE: Salvamos a senha criptografada!
+                    
                     .password(passwordEncoder.encode("admin123")) 
+                    .role(Role.ADMIN)
                     .build();
             userRepository.save(adminUser);
             System.out.println(">>> Usuário 'admin' criado com senha 'admin123'. <<<");
         }
+
+    // --- Criação de Projetos de Teste ---
 
         Project p1 = new Project();
     p1.setName("Plataforma EURON de Inovação Aberta");
@@ -63,7 +67,7 @@ public class DataLoader implements CommandLineRunner {
     p3.setResponsible("Dr. Ana Silva");
     p3.setStatus("Concluído");
     p3.setStartDate(LocalDate.of(2024, 5, 20));
-    p3.setEndDate(LocalDate.of(2025, 8, 29)); // Concluído recentemente
+    p3.setEndDate(LocalDate.of(2025, 8, 29)); 
 
     Project p4 = new Project();
     p4.setName("Digitalização do Processo de Qualidade");
@@ -78,7 +82,7 @@ public class DataLoader implements CommandLineRunner {
     p5.setDescription("Pesquisa inicial e análise de mercado para a entrada da Eurofarma no segmento de terapias gênicas. Parceria com instituto de pesquisa.");
     p5.setResponsible("Sofia Lorenzi");
     p5.setStatus("Planejamento");
-    p5.setStartDate(LocalDate.of(2025, 10, 1)); // Inicia em breve
+    p5.setStartDate(LocalDate.of(2025, 10, 1)); 
     p5.setEndDate(LocalDate.of(2026, 3, 31));
 
     Project p6 = new Project();

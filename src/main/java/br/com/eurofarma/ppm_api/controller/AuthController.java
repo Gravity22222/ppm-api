@@ -27,18 +27,17 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest authRequest) {
-        // 1. Tenta autenticar o usuário com as credenciais fornecidas
+       
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword())
         );
 
-        // 2. Se a autenticação for bem-sucedida, busca os detalhes do usuário
+    
         final UserDetails userDetails = userDetailsService.loadUserByUsername(authRequest.getUsername());
 
-        // 3. Gera um token JWT para o usuário
         final String jwt = jwtService.generateToken(userDetails);
 
-        // 4. Retorna o token na resposta
+        
         return ResponseEntity.ok(new AuthResponse(jwt));
     }
 }
