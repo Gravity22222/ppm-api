@@ -1,8 +1,8 @@
 package br.com.eurofarma.ppm_api.config;
 
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod; // Importe o HttpMethod se precisar ser mais específico
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -30,34 +30,35 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    http
-        .cors(withDefaults())
-        .csrf(csrf -> csrf.disable())
-        .authorizeHttpRequests(auth -> auth
-            .requestMatchers(
-                "/api/auth/**",
-                "/v3/api-docs/**",
-                "/swagger-ui/**",
-                "/swagger-ui.html"
-            ).permitAll()
-            
-            
-            .requestMatchers("/api/projects/**").hasAuthority("ADMIN")
+        http
+            .cors(withDefaults())
+            // GARANTIA: A proteção CSRF está desabilitada.
+            .csrf(csrf -> csrf.disable()) 
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers(
+                    "/api/auth/**",
+                    "/v3/api-docs/**",
+                    "/swagger-ui/**",
+                    "/swagger-ui.html"
+                ).permitAll()
+                
+                // A CHAVE ESTÁ AQUI: Esta regra com "/api/projects/**" se aplica a TODAS
+                // as sub-rotas e a TODOS os métodos (GET, POST, PUT, DELETE) sob /api/projects.
+                .requestMatchers("/api/projects/**").hasAuthority("ADMIN")
 
-            .anyRequest().authenticated()
-        )
-        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .anyRequest().authenticated()
+            )
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
-    return http.build();
-}
+        return http.build();
+    }
 
-    
-
+    // O resto do arquivo continua igual...
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://localhost:8080")); // Adicionado localhost:8080 para o Swagger
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
