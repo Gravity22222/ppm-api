@@ -1,10 +1,5 @@
 # PPM Eurofarma - API Backend (Imagem Docker)
 
-![Docker Pulls](https://img.shields.io/docker/pulls/graviityy/ppm-api?style=for-the-badge)
-![Versão](https://img.shields.io/badge/versão-latest-green?style=for-the-badge)
-![Java](https://img.shields.io/badge/Java-17-blue?style=for-the-badge)
-![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.x-green?style=for-the-badge)
-
 API RESTful para o sistema de Gestão de Portfólio de Projetos (PPM) da Eurofarma. Este projeto é distribuído como uma imagem Docker pronta para execução, contendo a aplicação backend completa.
 
 A aplicação fornece endpoints seguros para o gerenciamento de projetos e usuários, com documentação interativa via Swagger.
