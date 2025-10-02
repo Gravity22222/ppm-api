@@ -1,38 +1,37 @@
-
 version: '3.8'
 
 services:
-
+  # --- Serviço do Banco de Dados ---
   db:
-
     image: postgres:14-alpine
-
     restart: always
-
     environment:
-      POSTGRES_USER: new_user      # IMPORTANTE: Use o mesmo usuário do seu application.properties
-      POSTGRES_PASSWORD: my_pwd    # IMPORTANTE: Use a mesma senha do seu application.properties
-      POSTGRES_DB: postgres      # IMPORTANTE: Use o mesmo nome de banco do seu application.properties
-
-    
+      # Apenas as variáveis que o PostgreSQL entende
+      POSTGRES_USER: new_user
+      POSTGRES_PASSWORD: my_pwd
+      POSTGRES_DB: postgres
     ports:
       - "5432:5432"
-
-    
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-
+  # --- Serviço da API ---
   api:
-    build: .  
+    build: .
     ports:
       - "8080:8080"
     environment:
-     
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/postgres # IMPORTANTE: Use o mesmo usuário do seu application.properties
-      SPRING_DATASOURCE_USERNAME: new_user # IMPORTANTE: Use a mesma senha do seu application.properties
-      SPRING_DATASOURCE_PASSWORD: my_pwd # IMPORTANTE: Use o mesmo nome de banco do seu application.properties
+      # CORREÇÃO: Passamos a URL do banco de dados diretamente aqui.
+      # O valor 'db' aponta para o serviço 'db' definido neste mesmo arquivo.
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/postgres
+      
+      # As outras variáveis que já tínhamos:
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+    
     depends_on:
-      - db 
+      - db
+
 volumes:
   postgres_data:
