@@ -62,7 +62,7 @@ Este método orquestra a inicialização da API e do banco de dados com um únic
 
       api:
         # Caso esteja na pasta raiz do projeto, ao inves de image, utilizar build: . (dessa forma o docker-compose irá ler o Dockerfile do projeto)
-        image: graviityy/ppm-api:latest
+        image: graviityy/ppm-api:1.5
         restart: always
         ports:
           - "8080:8080"
