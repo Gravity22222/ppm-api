@@ -1,37 +1,34 @@
 version: '3.8'
 
 services:
-  # --- Serviço do Banco de Dados ---
   db:
     image: postgres:14-alpine
     restart: always
     environment:
-      # Apenas as variáveis que o PostgreSQL entende
-      POSTGRES_USER: new_user
-      POSTGRES_PASSWORD: my_pwd
-      POSTGRES_DB: postgres
+      # As variáveis agora são lidas do arquivo .env
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  # --- Serviço da API ---
   api:
     build: .
+    restart: always
     ports:
       - "8080:8080"
+    depends_on:
+      - db
     environment:
-      # CORREÇÃO: Passamos a URL do banco de dados diretamente aqui.
-      # O valor 'db' aponta para o serviço 'db' definido neste mesmo arquivo.
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/postgres
-      
-      # As outras variáveis que já tínhamos:
+      # A API também lê as mesmas variáveis do arquivo .env
+      SPRING_PROFILES_ACTIVE: docker
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
-    
-    depends_on:
-      - db
+      # A URL do banco também pode ser construída com variáveis
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB}
 
 volumes:
   postgres_data:
