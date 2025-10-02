@@ -1,0 +1,158 @@
+# PPM Eurofarma - API Backend (Imagem Docker)
+
+![Docker Pulls](https://img.shields.io/docker/pulls/graviityy/ppm-api?style=for-the-badge)
+![Versão](https://img.shields.io/badge/versão-latest-green?style=for-the-badge)
+![Java](https://img.shields.io/badge/Java-17-blue?style=for-the-badge)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.x-green?style=for-the-badge)
+
+API RESTful para o sistema de Gestão de Portfólio de Projetos (PPM) da Eurofarma. Este projeto é distribuído como uma imagem Docker pronta para execução, contendo a aplicação backend completa.
+
+A aplicação fornece endpoints seguros para o gerenciamento de projetos e usuários, com documentação interativa via Swagger.
+
+## Índice
+
+- [Pré-requisitos](#pré-requisitos)
+- [Opção 1: Execução via `docker-compose` ](#opção-1-execução-via-docker-compose)
+- [Opção 2: Execução via `docker run` (Método Manual)](#opção-2-execução-via-docker-run)
+- [Acesso à Documentação (Swagger)](#acesso-à-documentação-swagger)
+- [Comandos Úteis](#comandos-úteis)
+
+## Pré-requisitos
+
+Para rodar esta aplicação, você precisa ter as seguintes ferramentas instaladas:
+- [Docker](https://www.docker.com/products/docker-desktop/)
+- [Docker Compose](https://docs.docker.com/compose/install/) (geralmente já vem com o Docker Desktop)
+
+---
+
+## Opção 1: Execução via `docker-compose`
+
+Este método orquestra a inicialização da API e do banco de dados com um único comando, usando uma configuração limpa e segura.
+
+### Passo 1: Crie os Arquivos de Configuração
+
+1.  Em seu computador, crie uma pasta vazia para a aplicação (ex: `eurofarma-deploy`).
+2.  Dentro desta pasta, crie um arquivo chamado `.env`. Ele guardará suas senhas e segredos. Cole o conteúdo abaixo, substituindo os valores:
+
+    **Arquivo: `.env`**
+    ```env
+    # Credenciais para o banco de dados PostgreSQL
+    POSTGRES_USER=new_user
+    POSTGRES_PASSWORD=my_pwd
+    POSTGRES_DB=eurofarma_ppm
+
+    # Chave secreta para a assinatura dos tokens JWT da API
+    # IMPORTANTE: Em produção, gere uma chave segura com: openssl rand -base64 32
+    JWT_SECRET=NDQ1Njc3Njk3MTMyNzQzNjRlNjk3MzcwNzQ2ODczNjMyZDY5NjE2ZTJkNw==
+    ```
+
+3.  Na mesma pasta, crie um arquivo chamado `docker-compose.yml`.
+
+    **Arquivo: `docker-compose.yml`**
+    ```yml
+    version: '3.8'
+
+    services:
+      db:
+        image: postgres:14-alpine
+        restart: always
+        environment:
+          POSTGRES_USER: ${POSTGRES_USER}
+          POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+          POSTGRES_DB: ${POSTGRES_DB}
+        ports:
+          - "5432:5432"
+        volumes:
+          - postgres_data:/var/lib/postgresql/data
+
+      api:
+        # Caso esteja na pasta raiz do projeto, ao inves de image, utilizar build: . (dessa forma o docker-compose irá ler o Dockerfile do projeto)
+        image: graviityy/ppm-api:latest
+        restart: always
+        ports:
+          - "8080:8080"
+        depends_on:
+          - db
+        environment:
+          SPRING_PROFILES_ACTIVE: docker
+          SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+          SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+          JWT_SECRET: ${JWT_SECRET}
+          SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB}
+
+    volumes:
+      postgres_data:
+    ```
+
+### Passo 2: Inicie a Aplicação
+
+Com os dois arquivos na mesma pasta, abra um terminal nesse local e execute:
+
+```bash
+docker-compose up -d
+```
+Este comando irá baixar (`pull`) as imagens necessárias e iniciar os contêineres em segundo plano (`-d`).
+
+---
+
+## Opção 2: Execução via `docker run`
+
+Este método requer comandos separados para cada serviço e o gerenciamento manual da rede.
+
+### Passo 1: Crie uma Rede Docker
+```bash
+docker network create ppm-net
+```
+
+### Passo 2: Inicie o Banco de Dados
+```bash
+docker run -d --name postgres-db --network ppm-net -e POSTGRES_PASSWORD=my_pwd -e POSTGRES_USER=new_user -e POSTGRES_DB=eurofarma_ppm -p 5432:5432 -v postgres_data:/var/lib/postgresql/data postgres:14-alpine
+```
+
+### Passo 3: Inicie a API Backend
+Substitua `sua_chave_secreta...` pela sua chave JWT.
+```bash
+docker run -d -p 8080:8080 --name container-ppm-api --network ppm-net -e SPRING_PROFILES_ACTIVE=docker -e SPRING_DATASOURCE_URL="jdbc:postgresql://postgres-db:5432/eurofarma_ppm" -e SPRING_DATASOURCE_USERNAME=new_user -e SPRING_DATASOURCE_PASSWORD=my_pwd -e JWT_SECRET="NDQ1Njc3Njk3MTMyNzQzNjRlNjk3MzcwNzQ2ODczNjMyZDY5NjE2ZTJkNw==" graviityy/ppm-api:1.5
+```
+
+---
+
+## Acesso à Documentação (Swagger)
+
+Independentemente do método de execução, após alguns instantes, a aplicação estará no ar.
+
+-   **Acesse a documentação interativa via navegador:**
+    [http://localhost:8080/swagger-ui/index.html]
+
+### Autenticação no Swagger
+Para testar os endpoints protegidos:
+1.  Use o endpoint `POST /api/auth/login` para obter um token JWT.
+    - Corpo da Requisição: `{"username": "admin", "password": "admin123"}`
+2.  Copie o `token` recebido.
+3.  Clique no botão **"Authorize"** no canto superior direito do Swagger.
+4.  Na janela, cole o token `eyJhbGciOi...`
+5.  Clique em "Authorize" para salvar. Agora você pode executar os endpoints que têm um ícone de cadeado.
+
+## Comandos Úteis
+
+-   **Ver logs da aplicação em tempo real:**
+    ```bash
+    # Se usando docker-compose
+    docker-compose logs -f api
+
+    # Se usando docker run
+    docker logs -f container-ppm-api
+    ```
+
+-   **Parar a aplicação:**
+    ```bash
+    # Se usando docker-compose (para e remove os contêineres)
+    docker-compose down
+
+    # Para remover os dados do banco junto, use:
+    docker-compose down -v
+
+    # Se usando docker run
+    docker stop container-ppm-api postgres-db
+    docker rm container-ppm-api postgres-db
+    ```
